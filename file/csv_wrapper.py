@@ -1,4 +1,25 @@
 import csv
+import functools
+
+
+def traversal(row_key=None, column_key=None):
+    def wrapper(function):
+        @functools.wraps(function)
+        def inner_wrapper(*args, **kwargs):
+            idx = 0
+            while True:
+                if row_key and column_key:
+                    yield function(row_key, column_key)
+                    break
+                elif row_key is not None:
+                    yield function(row_key, idx)
+                elif column_key is not None:
+                    yield function(idx, column_key)
+                else:
+                    break
+                idx += 1
+        return inner_wrapper
+    return wrapper
 
 
 def open_csv(filepath):
@@ -28,6 +49,7 @@ def open_csv(filepath):
                 column_index = column_key
 
             value = data_table[row_index][column_index]
+
         except ValueError as value_error:
             key = value_error.message.split('is not in list', 1)[0]
             raise KeyError('key {} does not exist'.format(key))
@@ -46,10 +68,56 @@ if __name__ == "__main__":
     currency_get_value = open_csv('currency.csv')
 
     print currency_get_value("Exchange rate", 'CNY')
-    # 1 CNY = 0.1543550000 USD
+    # >> 1 CNY = 0.1543550000 USD
+
     print currency_get_value("Locale", 'CNY')
-    # China
+    # >> China
+
     print currency_get_value("Locale", "USD")
-    # USA
+    # >> USA
+
+    print currency_get_value("Locale", -1)
+    # >> USA
+
     print currency_get_value("Locale", -1)
     # USA
+
+    columns = traversal(row_key='Locale')(currency_get_value)
+    for c in columns():
+        print c
+    # >> Locale
+    # >> Australian
+    # >> ...
+    # >> TaiWan
+    # >> USA
+
+    rows = traversal(column_key='CNY')(currency_get_value)
+    for r in rows():
+        print r
+    # >> CNY
+    # >> 1 CNY = 0.1543550000 USD
+    # >> China
+    columns = traversal(row_key='Locale')(currency_get_value)
+    for c in columns():
+        print c
+    # >> Locale
+    # >> Australian
+    # >> ...
+    # >> TaiWan
+    # >> USA
+
+    rows = traversal(column_key='CNY')(currency_get_value)
+    for r in rows():
+        print r
+    # >> CNY
+    # >> 1 CNY = 0.1543550000 USD
+    # >> China
+
+    # if row and column provided, there's actually only one value
+    for v in traversal("Locale", "AUD")(currency_get_value)():
+        print v
+    # >> Australian
+
+    # print nothing for now
+    for v in traversal()(currency_get_value)():
+        print v
