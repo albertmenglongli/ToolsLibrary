@@ -47,6 +47,8 @@ def open_csv(filepath):
                 column_index = columns_idx_key.index(column_key)
             elif isinstance(column_key, int):
                 column_index = column_key
+            else:
+                raise Exception("Not supported Key")
 
             value = data_table[row_index][column_index]
 
@@ -60,6 +62,7 @@ def open_csv(filepath):
             if row_index < - len(data_table) or column_index < -len(data_table[0]):
                 raise IndexError(
                     "negative index supported, but not that much!")
+
         return data_table[row_index][column_index]
 
     return get_value_by_coordinate
@@ -78,9 +81,6 @@ if __name__ == "__main__":
 
     print currency_get_value("Locale", -1)
     # >> USA
-
-    print currency_get_value("Locale", -1)
-    # USA
 
     columns = traversal(row_key='Locale')(currency_get_value)
     for c in columns():
