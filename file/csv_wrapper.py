@@ -2,6 +2,11 @@ import csv
 import functools
 
 
+class Bunch(object):
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(kwargs)
+
+
 def traversal(row_key=None, column_key=None):
     def wrapper(function):
         @functools.wraps(function)
@@ -22,29 +27,42 @@ def traversal(row_key=None, column_key=None):
     return wrapper
 
 
+def traversal_row_records(function):
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        row_idx = 1
+        while True:
+            dictionary = {}
+            for key in function.column_idx_keys:
+                dictionary.update({key: function(row_idx, key)})
+            yield dictionary
+            row_idx += 1
+    return wrapper
+
+
 def open_csv(filepath):
     with open(filepath) as f:
         csv_f = csv.reader(f)
-        columns_idx_key = []
-        row_idx_key = []
+        column_idx_keys = []
+        row_idx_keys = []
         data_table = []
         for idx, row in enumerate(csv_f):
             if idx == 0:
-                columns_idx_key += row
-            row_idx_key.append(row[0])
+                column_idx_keys += row
+            row_idx_keys.append(row[0])
             data_table.append(row)
 
     def get_value_by_coordinate(row_key, column_key):
         try:
             if isinstance(row_key, str):
-                row_index = row_idx_key.index(row_key)
+                row_index = row_idx_keys.index(row_key)
             elif isinstance(row_key, int):
                 row_index = row_key
             else:
                 raise Exception("Not supported Key")
 
             if isinstance(column_key, str):
-                column_index = columns_idx_key.index(column_key)
+                column_index = column_idx_keys.index(column_key)
             elif isinstance(column_key, int):
                 column_index = column_key
             else:
@@ -64,6 +82,9 @@ def open_csv(filepath):
                     "negative index supported, but not that much!")
 
         return data_table[row_index][column_index]
+
+    get_value_by_coordinate.column_idx_keys = column_idx_keys
+    get_value_by_coordinate.row_idx_keys = row_idx_keys
 
     return get_value_by_coordinate
 
