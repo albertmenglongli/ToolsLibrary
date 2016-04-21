@@ -16,10 +16,27 @@ People = {
         'gender': 'male',
         'full_name': 'Mr. Unknown',
         'skin': 'yellow',
-        'language': [],
+        'language': {
+            'English': 'Good',
+            'Japanese': {
+                'level': 0,
+            },
+        },
     },
     'menglong': {
         'full_name': 'Li, Menglong',
-        'language': ['Chinese', 'English'],
+        'language': {
+            'English': 'Soso',
+            'Chinese': 'Mother Tougue',
+        },
+        'key_not_in_default': {
+            'des': 'which is not recommended',
+        },
+    },
+    'albert': {
+        'full_name': 'Albert, Lee',
+        'language': {
+            'English': 'Excellent',
+        },
     }
 }
