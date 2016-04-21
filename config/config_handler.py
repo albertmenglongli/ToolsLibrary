@@ -7,8 +7,8 @@ class ParameterBasedSingletonMetaClass(type):
 
     def __call__(cls, *args, **kwargs):
 
-        dic_hash = hash(json.dumps(args) + json.dumps(kwargs))
-        instance_key = cls.__name__ + str(dic_hash)
+        parameter_hash = hash(json.dumps(args) + json.dumps(kwargs))
+        instance_key = cls.__name__ + str(parameter_hash)
         if instance_key not in cls._instances:
             cls._instances[instance_key] = super(
                 ParameterBasedSingletonMetaClass, cls).__call__(*args, **kwargs)
