@@ -7,6 +7,10 @@ class Bunch(object):
         self.__dict__.update(kwargs)
 
 
+def sampling(selection, offset=0, limit=None):
+    return selection[offset:(limit + offset if limit is not None else None)]
+
+
 def traversal(row_key=None, column_key=None):
     def wrapper(function):
         @functools.wraps(function)
