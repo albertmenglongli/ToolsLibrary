@@ -1,0 +1,31 @@
+{
+  "id": "e96a7777d9854eecb30a4c917bf2bfa5",
+  "platform": "python",
+  "Exception": {
+    "values": [
+      {
+        "stacktrace": {
+          "frames": [
+            {
+              "function": "_validate_card",
+              "vars": {
+                "cardpwd": "u'thisiscardpwd'",
+                "uid": "u'thisisuid'",
+                "payload": {
+                  "'cardPwd'": "u'thisiscardpwd'",
+                  "'hash'": "'hashhashhashhash'",
+                  "'authCode'": "u'authCodeauthCodeauthCodeauthCode'",
+                  "'cardId'": "u'MAVV00012979'"
+                }
+              },
+              "module": "module.module",
+              "filename": "dir/filename.py"
+            }
+          ]
+        },
+        "type": "ReadTimeout",
+        "module": "requests.exceptions"
+      }
+    ]
+  }
+}
