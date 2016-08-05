@@ -3,6 +3,7 @@ import re
 from collections import defaultdict
 import argparse
 
+
 def main(args):
 
     # the hard-code part
@@ -32,10 +33,9 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f','--files', nargs='+')
-    parser.add_argument('-p','--patterns', nargs='+')
-    parser.add_argument('-pr','--prefix')
+    parser.add_argument('-f', '--files', nargs='+')
+    parser.add_argument('-p', '--patterns', nargs='+')
+    parser.add_argument('-pr', '--prefix')
 
     args = parser.parse_args()
     main(args)
-
