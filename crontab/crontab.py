@@ -36,39 +36,52 @@ def timezone_parser(crontab_time, hour_delta=-12):
     day_of_month = int(crontab_time.get('day_of_month')) if crontab_time.get('day_of_month', '*').isdigit() else '*'
     month_of_year = int(crontab_time.get('month_of_year')) if crontab_time.get('month_of_year', '*').isdigit() else '*'
     year = int(crontab_time.get('year')) if crontab_time.get('year', '*').isdigit() else '*'
-
+    # Weekly
     if isinstance(day_of_week, int):
         result = deepcopy(crontab_time)
         result['hour'], result['day_of_week'] = (hour + hour_delta) % 24, (day_of_week - 1 + (hour + hour_delta) / 24) % 7 + 1
         return [copy_dict_with_stringfy_and_default_valuevalue(result)]
-
+    # Oncely
     elif all(isinstance(e, int) for e in [minute, hour, day_of_month, month_of_year, year]):
         dt = datetime.datetime(year, month_of_year, day_of_month, hour, minute) + datetime.timedelta(hours=hour_delta)
         result = deepcopy(crontab_time)
         result['year'], result['month_of_year'], result['day_of_month'], result['hour'] = dt.year, dt.month, dt.day, dt.hour
         return [copy_dict_with_stringfy_and_default_valuevalue(result)]
-    else:
-        result = deepcopy(crontab_time)
-        result['hour'] = (hour + hour_delta) % 24
-        if crontab_time['day_of_month'] == '*':
+    # Daily
+    elif crontab_time['day_of_month'] == '*':
+            result = deepcopy(crontab_time)
+            result['hour'] = (hour + hour_delta) % 24
             return [copy_dict_with_stringfy_and_default_valuevalue(result)]
-        else:
-            results = []
-            if crontab_time['month_of_year'].isdigit():
-                result = deepcopy(crontab_time)
-                new_month_of_year = (month_of_year - 1 + (hour + hour_delta) / 24) % 12 + 1
-                for dates_num_in_month, months in month_type.items():
-                    if new_month_of_year in months:
-                        dates_num_in_month = dates_num_in_month
-                        result['hour'], result['day_of_month'], result['month_of_year'] = (
-                            hour + hour_delta) % 24, (day_of_month - 1 + (hour + hour_delta) / 24) % dates_num_in_month + 1, new_month_of_year
-                        return [copy_dict_with_stringfy_and_default_valuevalue(result)]
+    # Yearly
+    elif crontab_time['month_of_year'].isdigit():
+        result = deepcopy(crontab_time)
+        new_month_of_year = (month_of_year - 1 + (hour + hour_delta) / 24) % 12 + 1
+        for dates_num_in_month, months in month_type.items():
+            if new_month_of_year in months:
+                dates_num_in_month = dates_num_in_month
+                result['hour'], result['day_of_month'], result['month_of_year'] = (
+                    hour + hour_delta) % 24, (day_of_month - 1 + (hour + hour_delta) / 24) % dates_num_in_month + 1, new_month_of_year
+                return [copy_dict_with_stringfy_and_default_valuevalue(result)]
+    # Monthly
+    else:
+        results = []
+        for dates_num_in_month, months in month_type.items():
+            result = deepcopy(crontab_time)
+            result['hour'] = (hour + hour_delta) % 24
+            result['day_of_month'] = (day_of_month - 1 + (hour + hour_delta) / 24) % dates_num_in_month + 1
+            result['month_of_year'] = deepcopy(months)
+            if (day_of_month - 1 + (hour + hour_delta) / 24) / dates_num_in_month == 1:
+                result['month_of_year'] =  [month + (day_of_month - 1 + (hour + hour_delta) / 24) / dates_num_in_month for month in result['month_of_year']]
+            for r in results:
+                if r['day_of_month'] == result['day_of_month']:
+                    r['month_of_year'].extend(result['month_of_year'])
+                    break
             else:
-                for dates_num_in_month, months in month_type.items():
-                    result = deepcopy(crontab_time)
-                    result['hour'] = (hour + hour_delta) % 24
-                    result['day_of_month'] = (day_of_month - 1 + (hour + hour_delta) / 24) % dates_num_in_month + 1
-                    result['month_of_year'] = ','.join([str(e) for e in months])
-                    results.append(result)
-            return [copy_dict_with_stringfy_and_default_valuevalue(result) for result in results]
-
+                results.append(result)
+        for r in results:
+            r['month_of_year'].sort()
+            if all(i in r['month_of_year'] for i in range(1, 13)):
+                r['month_of_year'] = '*'
+            else:
+                r['month_of_year'] = ','.join(str(e) for e in r['month_of_year'])
+        return [copy_dict_with_stringfy_and_default_valuevalue(result) for result in results]
