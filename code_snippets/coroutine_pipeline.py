@@ -41,24 +41,25 @@ def gen_pipeline(*args):
         pipeline = gen_process_chain(method, pipeline)
     return pipeline
 
-
-# Usage: could be used as for-loop or responsibility-chain
-
-class Handler(object):
-
-    def __init__(self, msg_to_append):
-        self.msg_to_append = msg_to_append
-
-    def process(self, msg_lst):
-        msg_lst.append(self.msg_to_append)
-
-handlers = [Handler(' nice weather, right?'), Handler(' Good to here from you.')]
-pipeline = gen_pipeline(*handlers)
-msg_lst = ['Got a letter']
-pipeline.send(msg_lst)
-print msg_lst  # ['Got a letter', ' nice weather, right?', ' Good to here from you.']
-
-another_msg_lst = ['Reply']
-pipeline.send(another_msg_lst)  # ['Reply', ' nice weather, right?', ' Good to here from you.']
-print another_msg_lst
-pipeline.close()
+'''
+    # Usage: could be used as for-loop or responsibility-chain
+    
+    class Handler(object):
+    
+        def __init__(self, msg_to_append):
+            self.msg_to_append = msg_to_append
+    
+        def process(self, msg_lst):
+            msg_lst.append(self.msg_to_append)
+    
+    handlers = [Handler(' nice weather, right?'), Handler(' Good to here from you.')]
+    pipeline = gen_pipeline(*handlers)
+    msg_lst = ['Got a letter']
+    pipeline.send(msg_lst)
+    print msg_lst  # ['Got a letter', ' nice weather, right?', ' Good to here from you.']
+    
+    another_msg_lst = ['Reply']
+    pipeline.send(another_msg_lst)  # ['Reply', ' nice weather, right?', ' Good to here from you.']
+    print another_msg_lst
+    pipeline.close()
+'''
