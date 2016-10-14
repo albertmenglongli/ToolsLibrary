@@ -9,14 +9,14 @@ class Handler(object):
     def process(self, msg_lst):
         msg_lst.append(self.msg_to_append)
 
-handlers = [Handler(' nice weather, right?'), Handler(' Good to here from you.')]
+handlers = [Handler(' nice weather, right?'), Handler(' Good to hear from you.')]
 pipeline = gen_pipeline(*handlers)
 msg_lst = ['Got a letter']
 pipeline.send(msg_lst)
-print msg_lst  # ['Got a letter', ' nice weather, right?', ' Good to here from you.']
+print msg_lst  # ['Got a letter', ' nice weather, right?', ' Good to hear from you.']
 
 another_msg_lst = ['Reply']
-pipeline.send(another_msg_lst)  # ['Reply', ' nice weather, right?', ' Good to here from you.']
+pipeline.send(another_msg_lst)  # ['Reply', ' nice weather, right?', ' Good to hear from you.']
 print another_msg_lst
 pipeline.close()
 '''
