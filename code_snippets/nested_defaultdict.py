@@ -17,5 +17,4 @@ Usage:
 '''
 
 from collections import defaultdict
-import json
 tree = lambda: defaultdict(tree)
