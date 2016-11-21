@@ -2,6 +2,7 @@ def retry(tries, delay=1, factor=2):
 
     import time
     import math
+    import functools
 
     if factor <= 1:
         raise ValueError("backoff must be greater than 1")
