@@ -1,7 +1,7 @@
 import sys
 
 
-class progressbar(object):
+class Progressbar(object):
     def __init__(self, finalcount, block_char='.'):
         self.finalcount = finalcount
         self.blockcount = 0
@@ -31,7 +31,7 @@ class progressbar(object):
 if __name__ == "__main__":
     from time import sleep
 
-    pb = progressbar(100, '#')
+    pb = Progressbar(100, '#')
 
     for i in range(0, 101):
         pb.progress(i)
