@@ -11,7 +11,7 @@ def parse_timezone_to_oclock_sharp(timezone_str):
     else:
         raise Exception('Timezone invalid: %s' % timezone_str)
  
- if __name__ == "__main__":
+if __name__ == "__main__":
     lst = ['00:00', '00: 00', '1:00', '01:00\n', '+01:30', '-11:00', '-11:30', '-12:00']
-    print(map(parse_timezone_str_to_supported_if_valid, lst))
+    print(map(parse_timezone_to_oclock_sharp, lst))
     # ['+00:00', '+00:00', '+01:00', '+01:00', '+01:00', '-11:00', '-11:00', '-12:00']
