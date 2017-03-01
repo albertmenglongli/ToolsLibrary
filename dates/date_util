@@ -49,8 +49,6 @@ class DateUtil(object):
         elif hanlding_type is DateUtil.HandlingDateType.raw_string:
             return [(e[0].strftime("%Y-%m-%d"), e[1].strftime("%Y-%m-%d")) for e in pieces_of_dates]
 
-    def hi(self):
-        return 'hi in HI_METHOD'
 
 
 def main():
