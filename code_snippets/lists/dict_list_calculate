@@ -1,0 +1,23 @@
+"""
+Calculate the sum of all the dicts' amount in the following list.
+"""
+from functools import reduce
+
+body = [
+    {
+        'amount': 120,
+        'product': 1,
+    },
+    {
+        'amount': 80,
+        'product': 2,
+    }
+]
+
+# 200
+print(reduce(lambda x, y: {'amount': x['amount'] + y['amount']}, body)['amount'])
+
+cal_total_amount = lambda iterable: reduce(lambda x, y: {'amount': x['amount'] + y['amount']}, iterable)['amount']
+
+# 200
+print(cal_total_amount(body))
