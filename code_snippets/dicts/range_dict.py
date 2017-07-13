@@ -1,6 +1,7 @@
 class RangeDict:
     def __init__(self, my_dict):
-        assert all(map(lambda x: isinstance(x, tuple) and len(x) == 2 and x[0] <= x[1], my_dict))
+        # !any(!XXX) is faster than all(XXX)
+        assert not any(map(lambda x: not isinstance(x, tuple) or len(x) != 2 or x[0] > x[1], my_dict))
 
         def lte(bound):
             return lambda x: bound <= x
@@ -14,9 +15,9 @@ class RangeDict:
     def __getitem__(self, number):
         from functools import reduce
         _my_dict = self._my_dict
-        result = next((_my_dict[key] for key in _my_dict if list(reduce(lambda s, f: filter(f, s), key, [number]))),
-                      KeyError)
-        if result is KeyError:
+        try:
+            result = next((_my_dict[key] for key in _my_dict if list(reduce(lambda s, f: filter(f, s), key, [number]))))
+        except StopIteration as e:
             raise KeyError(number)
         return result
 
