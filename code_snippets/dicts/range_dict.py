@@ -1,6 +1,6 @@
 class RangeDict:
     def __init__(self, my_dict):
-        # !any(!XXX) is faster than all(XXX)
+        # !any(!A or !B) is faster than all(A and B)
         assert not any(map(lambda x: not isinstance(x, tuple) or len(x) != 2 or x[0] > x[1], my_dict))
 
         def lte(bound):
