@@ -5,7 +5,7 @@ def retry(tries, delay=1, factor=2):
     import functools
 
     if factor <= 1:
-        raise ValueError("backoff must be greater than 1")
+        raise ValueError("back off must be greater than 1")
 
     tries = math.floor(tries)
     if tries < 0:
