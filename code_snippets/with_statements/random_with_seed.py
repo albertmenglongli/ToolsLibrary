@@ -1,24 +1,41 @@
 from contextlib import contextmanager
-import random
 
 
 @contextmanager
-def context_random(seed):
-    old_state = random.getstate()
-    try:
-        random.seed(seed)
-        yield random
-    finally:
-        random.setstate(old_state)
+def context_random(random_module, seed):
+    assert random_module in ('random', 'numpy.random')
 
+    if random_module == 'random':
+        import random as _random
+        get_state_method_str = 'getstate'
+        set_state_method_str = 'setstate'
+    elif random_module == 'numpy.random':
+        from numpy import random as _random
+        get_state_method_str = 'get_state'
+        set_state_method_str = 'set_state'
+    else:
+        raise Exception('Not supported random module {random_module}'.format(random_module=random_module))
+
+    old_state = getattr(_random, get_state_method_str)()
+    try:
+        _random.seed(seed)
+        yield _random
+    finally:
+        getattr(_random, set_state_method_str)(old_state)
+
+
+with context_random(random_module='random', seed=3) as r:
+    print(r.random())
+    print(r.choice(range(1, 100)))
+
+with context_random(random_module='numpy.random', seed=3) as r:
+    print(r.random())
+    print(r.choice(range(1, 100)))
 
 try:
-    with context_random('111') as random:
-        print(random.random())
-        print(random.choice(range(1, 100)))
+    with context_random(random_module='random', seed=3) as r:
+        print(r.random())
+        print(r.choice(range(1, 100)))
         raise Exception()
 except:
     pass
-
-print(random.random())
-print(random.choice(range(1, 100)))
