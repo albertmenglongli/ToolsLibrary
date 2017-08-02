@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def context_random(random_module, seed):
+def random_context(random_module, seed):
     assert random_module in ('random', 'numpy.random')
 
     if random_module == 'random':
@@ -24,16 +24,16 @@ def context_random(random_module, seed):
         getattr(_random, set_state_method_str)(old_state)
 
 
-with context_random(random_module='random', seed=3) as r:
+with random_context(random_module='random', seed=3) as r:
     print(r.random())
     print(r.choice(range(1, 100)))
 
-with context_random(random_module='numpy.random', seed=3) as r:
+with random_context(random_module='numpy.random', seed=3) as r:
     print(r.random())
     print(r.choice(range(1, 100)))
 
 try:
-    with context_random(random_module='random', seed=3) as r:
+    with random_context(random_module='random', seed=3) as r:
         print(r.random())
         print(r.choice(range(1, 100)))
         raise Exception()
