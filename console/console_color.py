@@ -27,4 +27,4 @@ class ConsoleColor:
     END = '\033[0m'
 
 
-print(ConsoleColor.BOLD + ConsoleColor.BgCYAN + ConsoleColor.WHITE + 'Hello World !' + ConsoleColor.END + ConsoleColor.END + ConsoleColor.END)
+print(ConsoleColor.BOLD + ConsoleColor.BgCYAN + ConsoleColor.YELLOW + 'Hello World !' + ConsoleColor.END + ConsoleColor.END + ConsoleColor.END)
