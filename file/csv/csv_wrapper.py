@@ -95,21 +95,21 @@ def open_csv(filepath):
 if __name__ == "__main__":
     currency_get_value = open_csv('currency.csv')
 
-    print currency_get_value("Exchange rate", 'CNY')
+    print(currency_get_value("Exchange rate", 'CNY'))
     # >> 1 CNY = 0.1543550000 USD
 
-    print currency_get_value("Locale", 'CNY')
+    print(currency_get_value("Locale", 'CNY'))
     # >> China
 
-    print currency_get_value("Locale", "USD")
+    print(currency_get_value("Locale", "USD"))
     # >> USA
 
-    print currency_get_value("Locale", -1)
+    print(currency_get_value("Locale", -1))
     # >> USA
 
     columns = traversal(row_key='Locale')(currency_get_value)
     for c in columns():
-        print c
+         print(c)
     # >> Locale
     # >> Australian
     # >> ...
@@ -118,13 +118,13 @@ if __name__ == "__main__":
 
     rows = traversal(column_key='CNY')(currency_get_value)
     for r in rows():
-        print r
+         print(r)
     # >> CNY
     # >> 1 CNY = 0.1543550000 USD
     # >> China
     columns = traversal(row_key='Locale')(currency_get_value)
     for c in columns():
-        print c
+         print(c)
     # >> Locale
     # >> Australian
     # >> ...
@@ -133,16 +133,16 @@ if __name__ == "__main__":
 
     rows = traversal(column_key='CNY')(currency_get_value)
     for r in rows():
-        print r
+         print(r)
     # >> CNY
     # >> 1 CNY = 0.1543550000 USD
     # >> China
 
     # if row and column provided, there's actually only one value
     for v in traversal("Locale", "AUD")(currency_get_value)():
-        print v
+         print(v)
     # >> Australian
 
-    # print nothing for now
+    #  print(nothing for now
     for v in traversal()(currency_get_value)():
-        print v
+         print(v)
