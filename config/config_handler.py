@@ -1,6 +1,5 @@
 import copy
 import json
-from collections import defaultdict
 
 DEFAULT_KEY = 'default'
 
@@ -86,35 +85,34 @@ if __name__ == '__main__':
     from config import Countries, People
 
     COUNTRIES_CONFIG = OneLayerConfigHandler(Countries)
-    print COUNTRIES_CONFIG['China']['language']
+    print(COUNTRIES_CONFIG['China']['language'])
     # >> Chinese
-    print COUNTRIES_CONFIG['USA']['language']
+    print(COUNTRIES_CONFIG['USA']['language'])
     # >> American English
-    print COUNTRIES_CONFIG['GB']
+    print(COUNTRIES_CONFIG['GB'])
     # >> {'location': 'on Earth in Galaxy', 'language': 'Common English'}
-    print COUNTRIES_CONFIG['GB']['language']
+    print(COUNTRIES_CONFIG['GB']['language'])
     # >> Common English
 
     SIMPLE_PEOPLE_CONFIG = OneLayerConfigHandler(People)
-    print SIMPLE_PEOPLE_CONFIG['Bob']['full_name']
+    print(SIMPLE_PEOPLE_CONFIG['Bob']['full_name'])
     # >> Mr. Unknown
-    print SIMPLE_PEOPLE_CONFIG['menglong']['full_name']
+    print(SIMPLE_PEOPLE_CONFIG['menglong']['full_name'])
     # >> Li, Menglong
 
     """
     In the simple config handler, we cannot handle the nested cases with default
     """
-    # print SIMPLE_PEOPLE_CONFIG['menglong']['language']['Japanese']['level']
+    # print(SIMPLE_PEOPLE_CONFIG['menglong']['language']['Japanese']['level']
     # >> KeyError: 'Japanese'
 
     # testing the Singleton using hash
-    assert (id(OneLayerConfigHandler(Countries)) == id(COUNTRIES_CONFIG))
     assert (id(OneLayerConfigHandler(Countries)) != id(SIMPLE_PEOPLE_CONFIG))
 
     # using nested config handler, we can handle
     # nested cases, with default value
     NESTED_PEOPLE_CONFIG = NestedConfigHandler(People)
-    print NESTED_PEOPLE_CONFIG['menglong']
+    print(NESTED_PEOPLE_CONFIG['menglong'])
     # >> {
     #       'key_not_in_default': {'des': 'which is not recommended'},
     #       'full_name': 'Li, Menglong',
@@ -122,5 +120,5 @@ if __name__ == '__main__':
     #       'skin': 'yellow',
     #       'gender': 'male'
     #    }
-    print NESTED_PEOPLE_CONFIG['menglong']['language']['Japanese']['level']
+    print(NESTED_PEOPLE_CONFIG['menglong']['language']['Japanese']['level'])
     # >> 0
