@@ -50,19 +50,18 @@ class DateUtil(object):
             return [(e[0].strftime("%Y-%m-%d"), e[1].strftime("%Y-%m-%d")) for e in pieces_of_dates]
 
 
-
 def main():
-    print DateUtil.get_first_day_of_month('2014-3-4', delta_of_year=-1, delta_of_month=-1)
+    print(DateUtil.get_first_day_of_month('2014-3-4', delta_of_year=-1, delta_of_month=-1))
 
-    print DateUtil.get_last_month_str()
+    print(DateUtil.get_last_month_str())
 
-    print DateUtil.split_dates("2016-01-01", "2016-05-8", 50)
+    print(DateUtil.split_dates("2016-01-01", "2016-05-8", 50))
 
     import datetime
     date_format = "%Y%m%d"
     start_date = datetime.datetime.strptime("20160101", date_format)
     end_date = datetime.datetime.strptime("20160508", date_format)
-    print DateUtil.split_dates(start_date, end_date, 50, date_format)
+    print(DateUtil.split_dates(start_date, end_date, 50, date_format))
 
 
 if __name__ == '__main__':
