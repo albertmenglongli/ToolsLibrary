@@ -2,14 +2,14 @@ import functools
 from contextlib import contextmanager
 
 
-def coroutine(function):
+def coroutine(func):
     """
     this decorator will run the first next of the generator
     """
 
-    @functools.wraps(function)
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        generator = function(*args, **kwargs)
+        generator = func(*args, **kwargs)
         next(generator)
         return generator
 
