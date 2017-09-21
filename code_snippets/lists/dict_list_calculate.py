@@ -22,6 +22,7 @@ cal_total_amount = lambda iterable: reduce(lambda x, y: {'amount': x['amount'] +
 # 200
 print(cal_total_amount(body))
 
+
 # the reduct method above is faster than the following readable functional programming method
 def calculate_sum(iterable):
     try:
