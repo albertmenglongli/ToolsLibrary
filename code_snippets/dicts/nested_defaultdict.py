@@ -1,4 +1,4 @@
-'''
+"""
 Usage:
     r = tree()
 
@@ -14,7 +14,8 @@ Usage:
 
     print r['a']['c']['d']
     #dddd
-'''
+"""
 
 from collections import defaultdict
+
 tree = lambda: defaultdict(tree)
