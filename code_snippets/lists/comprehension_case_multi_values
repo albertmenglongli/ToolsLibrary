@@ -1,0 +1,6 @@
+from itertools import chain
+
+anchors = [10, 20, 30]
+# list comprehension generating two/multi values each iterate
+s = list(chain.from_iterable((anchor - 1, anchor + 1) for anchor in anchors))
+print(s)  # [9, 11, 19, 21, 29, 31]
