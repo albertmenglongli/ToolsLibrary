@@ -31,3 +31,4 @@ id = until(lambda x: x is not None, iter(candidates), '1')
 from funcy import first, compact
 candidates = [None, None, '25', None]
 id = first(compact(candidates)) # 25
+
