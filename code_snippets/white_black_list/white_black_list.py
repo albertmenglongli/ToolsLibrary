@@ -8,7 +8,7 @@ def is_acceptable(target, white_list=None, black_list=None):
     assert isinstance(white_list, Iterable)
     assert isinstance(black_list, Iterable)
 
-    return True if not (black_list and target in black_list) and (not white_list or target in white_list) else False
+    return not (black_list and target in black_list) and (not white_list or target in white_list)
 
 
 def filter_acceptable(targets, white_list=None, black_list=None, key=lambda x: x):
