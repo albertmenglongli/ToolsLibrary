@@ -2,8 +2,8 @@ from collections.abc import Iterable
 
 
 def is_acceptable(target, white_list=None, black_list=None):
-    white_list = white_list if white_list is not None else set()
-    black_list = black_list if black_list is not None else set()
+    white_list = white_list or set()
+    black_list = black_list or set()
 
     assert isinstance(white_list, Iterable)
     assert isinstance(black_list, Iterable)
@@ -12,8 +12,8 @@ def is_acceptable(target, white_list=None, black_list=None):
 
 
 def filter_acceptable(targets, white_list=None, black_list=None, key=lambda x: x):
-    white_list = white_list if white_list is not None else set()
-    black_list = black_list if black_list is not None else set()
+    white_list = white_list or set()
+    black_list = black_list or set()
 
     assert isinstance(white_list, Iterable)
     assert isinstance(black_list, Iterable)
