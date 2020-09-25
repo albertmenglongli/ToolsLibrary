@@ -21,7 +21,7 @@ from collections import defaultdict
 tree = lambda: defaultdict(tree)
 
 
-# converting nested defaultdict to normal nested dict
+# convert nested defaultdict to normal nested dict
 def ddict_to_dict(d):
     for k, v in d.items():
         if isinstance(v, dict):
