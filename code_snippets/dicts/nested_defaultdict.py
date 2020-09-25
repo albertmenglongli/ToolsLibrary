@@ -19,3 +19,11 @@ Usage:
 from collections import defaultdict
 
 tree = lambda: defaultdict(tree)
+
+
+# converting nested defaultdict to normal nested dict
+def ddict_to_dict(d):
+    for k, v in d.items():
+        if isinstance(v, dict):
+            d[k] = ddict_to_dict(v)
+    return dict(d)
