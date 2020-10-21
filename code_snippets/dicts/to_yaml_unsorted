@@ -52,4 +52,4 @@ expected = """defaults:
     c: 3
 """
 
-assert yaml.dump(traverse(d)) == expected
+assert yaml.dump(traverse(d), allow_unicode=True) == expected
