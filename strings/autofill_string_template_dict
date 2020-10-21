@@ -1,0 +1,150 @@
+import re
+from collections import deque
+from functools import lru_cache
+from itertools import chain
+from string import Template
+from typing import Any, List
+
+re_identifier = re.compile(r"(?<=\$)([_a-zA-Z][_a-zA-Z0-9]*)", re.UNICODE)
+re_identifier_with_braces = re.compile(r"(?<=\${)[_a-zA-Z][_a-zA-Z0-9]*(?=})", re.UNICODE)
+
+
+class Empty:
+    def __str__(self):
+        return 'UNASSIGNED'
+
+
+_empty = Empty()
+UNASSIGNED = _empty
+
+
+class Dict2Obj:
+    """
+    Turns a dictionary into a class
+    """
+
+    def __init__(self, dictionary):
+        """Constructor"""
+        for key in dictionary:
+            setattr(self, key, dictionary[key])
+
+
+def first(iterator, default, terminate=lambda x: x is not None) -> Any:
+    if isinstance(iterator, (list, tuple)):
+        iterator = iter(iterator)
+    try:
+        i = next(iterator)
+        if terminate(i):
+            return i
+        return first(iterator, default, terminate)
+    except StopIteration:
+        return default
+
+
+@lru_cache(maxsize=120)
+def extract_identifiers(str_tpl_string) -> List[str]:
+    global re_identifier
+    global re_identifier_with_braces
+    identifiers = re_identifier.findall(str_tpl_string)
+    identifiers += re_identifier_with_braces.findall(str_tpl_string)
+    identifiers = list(set(identifiers))
+    return identifiers
+
+
+def topological(graph):
+    gray, black = 0, 1
+    order, enter, state = deque(), set(graph), {}
+
+    def dfs(node):
+        state[node] = gray
+        for k in graph.get(node, ()):
+            sk = state.get(k, None)
+            if sk == gray:
+                raise ValueError("cycle")
+            if sk == black:
+                continue
+            enter.discard(k)
+            dfs(k)
+        order.appendleft(node)
+        state[node] = black
+
+    while enter:
+        dfs(enter.pop())
+    return order
+
+
+def autofill(template_dict: dict, *variables_holders) -> dict:
+    """
+    update and get fill all values in order of user_defined / variables_list[0] / variables_list[1] / ...
+    """
+    variables_holders = [Dict2Obj(v) if isinstance(v, dict) else v for v in variables_holders]
+
+    graph = {}
+    for key, str_tpl_string in template_dict.items():
+        graph[key] = []
+        if '$' not in str_tpl_string:
+            continue
+        _identifiers = extract_identifiers(str_tpl_string)
+        for _key in _identifiers:
+            if _key != key:
+                # add dependencies in the graph
+                graph[key].append(_key)
+    keys_without_dep = [item[0] for item in graph.items() if len(item[1]) == 0]
+    graph = {item[0]: item[1] for item in graph.items() if len(item[1]) != 0}
+    top_sorted_keys = topological(graph)
+    top_sorted_keys = list(filter(lambda __: __ not in keys_without_dep, top_sorted_keys)) + keys_without_dep
+    top_sorted_keys = list(filter(lambda __: __ in template_dict.keys(), top_sorted_keys))
+    key_value_pool = dict()
+    for key in top_sorted_keys[::-1]:
+        str_tpl_string = template_dict[key]
+
+        _identifiers = extract_identifiers(str_tpl_string)
+        if not _identifiers:
+            # user-provided raw string value
+            value = str_tpl_string
+        else:
+            dep_key_value_pool = {}
+            for dep_key in _identifiers:
+                dep_value = first(
+                    chain([key_value_pool.get(dep_key, UNASSIGNED)],
+                          (getattr(variable, dep_key, UNASSIGNED) for variable in variables_holders)),
+                    default=UNASSIGNED,
+                    terminate=lambda x: x is not UNASSIGNED)
+                if dep_value is UNASSIGNED:
+                    raise ValueError('Value for key "%s" not provided!' % dep_key)
+                else:
+                    # assign value for the dependent key
+                    dep_key_value_pool[dep_key] = dep_value
+            value = Template(str_tpl_string).substitute(**dep_key_value_pool)
+
+        key_value_pool[key] = value
+    return key_value_pool
+
+
+if __name__ == '__main__':
+    class DynamicVariables:
+        @property
+        def current_time(self):
+            from datetime import datetime
+            now = datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            return current_time
+
+
+    class ConstVariables:
+        first_name = 'xxx'
+        last_name = 'xxx'
+
+
+    variables_holder = DynamicVariables()
+    variables_dct = {'first_name': 'Alert', 'last_name': 'Lee'}
+
+    input_dict = {
+        'whoami': 'Clock',
+        'username': '$first_name $last_name',
+        'greetings': "$whoami: Hello ${username}, it's ${current_time} now"
+    }
+
+    # {'whoami': 'Clock', 'username': 'Alert Lee', 'greetings': "Clock: Hello Alert Lee, it's is 06:29:51 now"}
+    output_dict = autofill(input_dict, variables_holder, variables_dct, ConstVariables)
+    print(output_dict)
