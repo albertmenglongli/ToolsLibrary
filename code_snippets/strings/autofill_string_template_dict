@@ -137,8 +137,8 @@ if __name__ == '__main__':
         'greetings': '$greeting, $name!'
     }
     output_dict = autofill(str_template_dict, name='Albert', greeting='Nice to meet you')
-    # {'username': 'Albert', 'greetings': 'Nice to meet you, Albert!'}
     print(output_dict)
+    # {'username': 'Albert', 'greetings': 'Nice to meet you, Albert!'}
 
     # complex usage, with dynamic values, and multi value-providing holders
     str_template_dict = {
