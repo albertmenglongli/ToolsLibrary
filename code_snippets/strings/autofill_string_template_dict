@@ -131,6 +131,16 @@ def autofill(str_template_dict: dict, *variables_holders, **kwargs) -> dict:
 
 
 if __name__ == '__main__':
+    # simple usage
+    str_template_dict = {
+        'username': '$name',
+        'greetings': '$greeting, $name!'
+    }
+    output_dict = autofill(str_template_dict, name='Albert', greeting='Nice to meet you')
+    # {'username': 'Albert', 'greetings': 'Nice to meet you, Albert!'}
+    print(output_dict)
+
+    # complex usage, with dynamic values, and multi value-providing holders
     str_template_dict = {
         'whoami': 'Clock',
         'username': '$first_name $last_name',
