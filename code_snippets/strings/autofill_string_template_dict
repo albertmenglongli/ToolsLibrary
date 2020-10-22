@@ -131,6 +131,14 @@ def autofill(template_dict: dict, *variables_holders, **kwargs) -> dict:
 
 
 if __name__ == '__main__':
+    input_dict = {
+        'whoami': 'Clock',
+        'username': '$first_name $last_name',
+        'greetings': "$whoami: Hello ${username}, it's ${current_time} now, $greeting_content!",
+        'greeting_content': '$content'
+    }
+
+
     class DynamicVariables:
         @property
         def current_time(self):
@@ -147,18 +155,12 @@ if __name__ == '__main__':
 
     variables_dct = {'first_name': 'Alert', 'last_name': 'Lee'}
 
-    input_dict = {
-        'whoami': 'Clock',
-        'username': '$first_name $last_name',
-        'greetings': "$whoami: Hello ${username}, it's ${current_time} now, $greeting_content!",
-        'greeting_content': '$content'
-    }
-
     output_dict = autofill(input_dict, variables_dct, DynamicVariables(), ConstVariables, content='morning')
-    """
-    {'whoami': 'Clock',
-     'username': 'Alert Lee',
-     'greetings': "Clock: Hello Alert Lee, it's 11:07:16 now, morning!",
-     'greeting_content': 'morning'}
-    """
+
     print(output_dict)
+    # """
+    # {'whoami': 'Clock',
+    #  'username': 'Alert Lee',
+    #  'greetings': "Clock: Hello Alert Lee, it's 11:07:16 now, morning!",
+    #  'greeting_content': 'morning'}
+    # """
