@@ -153,9 +153,9 @@ if __name__ == '__main__':
         last_name = 'xxx'
 
 
-    variables_dct = {'first_name': 'Alert', 'last_name': 'Lee'}
+    variables_dict = {'first_name': 'Alert', 'last_name': 'Lee'}
 
-    output_dict = autofill(str_template_dict, variables_dct, DynamicVariables(), ConstVariables, content='morning')
+    output_dict = autofill(str_template_dict, variables_dict, DynamicVariables(), ConstVariables, content='morning')
 
     print(output_dict)
     # """
