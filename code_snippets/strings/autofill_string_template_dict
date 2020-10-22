@@ -75,7 +75,7 @@ def topological(graph):
     return order
 
 
-def autofill(template_dict: dict, *variables_holders, **kwargs) -> dict:
+def autofill(str_template_dict: dict, *variables_holders, **kwargs) -> dict:
     """
     update and get fill all values in order of user_defined / variables_list[0] / variables_list[1] / ...
     """
@@ -84,7 +84,7 @@ def autofill(template_dict: dict, *variables_holders, **kwargs) -> dict:
         variables_holders.append(Dict2Obj(kwargs))
 
     graph = {}
-    for key, str_tpl_string in template_dict.items():
+    for key, str_tpl_string in str_template_dict.items():
         graph[key] = []
         if '$' not in str_tpl_string:
             continue
@@ -97,10 +97,10 @@ def autofill(template_dict: dict, *variables_holders, **kwargs) -> dict:
     graph = {item[0]: item[1] for item in graph.items() if len(item[1]) != 0}
     top_sorted_keys = topological(graph)
     top_sorted_keys = list(filter(lambda __: __ not in keys_without_dep, top_sorted_keys)) + keys_without_dep
-    top_sorted_keys = list(filter(lambda __: __ in template_dict.keys(), top_sorted_keys))
+    top_sorted_keys = list(filter(lambda __: __ in str_template_dict.keys(), top_sorted_keys))
     key_value_pool = dict()
     for key in top_sorted_keys[::-1]:
-        str_tpl_string = template_dict[key]
+        str_tpl_string = str_template_dict[key]
 
         _identifiers = extract_identifiers(str_tpl_string)
         if not _identifiers:
@@ -125,13 +125,13 @@ def autofill(template_dict: dict, *variables_holders, **kwargs) -> dict:
 
     # keep the same order as input template_dict
     rest_dict = dict()
-    for key, __ in template_dict.items():
+    for key, __ in str_template_dict.items():
         rest_dict[key] = key_value_pool[key]
     return rest_dict
 
 
 if __name__ == '__main__':
-    input_dict = {
+    str_template_dict = {
         'whoami': 'Clock',
         'username': '$first_name $last_name',
         'greetings': "$whoami: Hello ${username}, it's ${current_time} now, $greeting_content!",
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     variables_dct = {'first_name': 'Alert', 'last_name': 'Lee'}
 
-    output_dict = autofill(input_dict, variables_dct, DynamicVariables(), ConstVariables, content='morning')
+    output_dict = autofill(str_template_dict, variables_dct, DynamicVariables(), ConstVariables, content='morning')
 
     print(output_dict)
     # """
