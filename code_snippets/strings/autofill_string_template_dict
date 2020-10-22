@@ -134,9 +134,9 @@ if __name__ == '__main__':
     # simple usage
     str_template_dict = {
         'username': '$name',
-        'greetings': '$greeting, $name!'
+        'greetings': '$greeting_content, $name!'
     }
-    output_dict = autofill(str_template_dict, name='Albert', greeting='Nice to meet you')
+    output_dict = autofill(str_template_dict, name='Albert', greeting_content='Nice to meet you')
     print(output_dict)
     # {'username': 'Albert', 'greetings': 'Nice to meet you, Albert!'}
 
