@@ -131,6 +131,7 @@ def autofill(str_template_dict: dict, *variables_holders, **kwargs) -> dict:
 
 
 if __name__ == '__main__':
+    ##########################################################################
     # simple usage
     str_template_dict = {
         'username': '$name',
@@ -139,16 +140,18 @@ if __name__ == '__main__':
     output_dict = autofill(str_template_dict, name='Albert', greeting_content='Nice to meet you')
     print(output_dict)
     # {'username': 'Albert', 'greetings': 'Nice to meet you, Albert!'}
-    
-    
 
+    ##########################################################################
     # complex usage, with dynamic values, and multi value-providing holders
+    # both $variable ${variable} declarations are supported as string Template format
     str_template_dict = {
         'whoami': 'Clock',
         'username': '$first_name $last_name',
-        'greetings': "$whoami: Hello ${username}, it's ${current_time} now, $greeting_content!",
+        'greetings': "${whoami}: Hello ${username}, it's ${current_time} now, ${greeting_content}!",
+        # 'greetings': "$whoami: Hello $username, it's $current_time now, $greeting_content!",
         'greeting_content': '$content'
     }
+
 
     class DynamicVariables:
         @property
@@ -158,9 +161,11 @@ if __name__ == '__main__':
             current_time = now.strftime("%H:%M:%S")
             return current_time
 
+
     class ConstVariables:
         first_name = 'xxx'
         last_name = 'xxx'
+
 
     variables_dict = {'first_name': 'Alert', 'last_name': 'Lee'}
 
