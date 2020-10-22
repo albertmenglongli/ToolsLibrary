@@ -134,11 +134,13 @@ if __name__ == '__main__':
     # simple usage
     str_template_dict = {
         'username': '$name',
-        'greetings': '$greeting_content, $name!'
+        'greetings': '$greeting_content, $username!'
     }
     output_dict = autofill(str_template_dict, name='Albert', greeting_content='Nice to meet you')
     print(output_dict)
     # {'username': 'Albert', 'greetings': 'Nice to meet you, Albert!'}
+    
+    
 
     # complex usage, with dynamic values, and multi value-providing holders
     str_template_dict = {
@@ -148,7 +150,6 @@ if __name__ == '__main__':
         'greeting_content': '$content'
     }
 
-
     class DynamicVariables:
         @property
         def current_time(self):
@@ -157,11 +158,9 @@ if __name__ == '__main__':
             current_time = now.strftime("%H:%M:%S")
             return current_time
 
-
     class ConstVariables:
         first_name = 'xxx'
         last_name = 'xxx'
-
 
     variables_dict = {'first_name': 'Alert', 'last_name': 'Lee'}
 
