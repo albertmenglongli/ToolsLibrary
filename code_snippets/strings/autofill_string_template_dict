@@ -75,11 +75,13 @@ def topological(graph):
     return order
 
 
-def autofill(template_dict: dict, *variables_holders) -> dict:
+def autofill(template_dict: dict, *variables_holders, **kwargs) -> dict:
     """
     update and get fill all values in order of user_defined / variables_list[0] / variables_list[1] / ...
     """
     variables_holders = [Dict2Obj(v) if isinstance(v, dict) else v for v in variables_holders]
+    if kwargs:
+        variables_holders.append(Dict2Obj(kwargs))
 
     graph = {}
     for key, str_tpl_string in template_dict.items():
@@ -120,7 +122,12 @@ def autofill(template_dict: dict, *variables_holders) -> dict:
             value = Template(str_tpl_string).substitute(**dep_key_value_pool)
 
         key_value_pool[key] = value
-    return key_value_pool
+
+    # keep the same order as input template_dict
+    rest_dict = dict()
+    for key, __ in template_dict.items():
+        rest_dict[key] = key_value_pool[key]
+    return rest_dict
 
 
 if __name__ == '__main__':
@@ -138,15 +145,20 @@ if __name__ == '__main__':
         last_name = 'xxx'
 
 
-    variables_holder = DynamicVariables()
     variables_dct = {'first_name': 'Alert', 'last_name': 'Lee'}
 
     input_dict = {
         'whoami': 'Clock',
         'username': '$first_name $last_name',
-        'greetings': "$whoami: Hello ${username}, it's ${current_time} now"
+        'greetings': "$whoami: Hello ${username}, it's ${current_time} now, $greeting_content!",
+        'greeting_content': '$content'
     }
 
-    # {'whoami': 'Clock', 'username': 'Alert Lee', 'greetings': "Clock: Hello Alert Lee, it's is 06:29:51 now"}
-    output_dict = autofill(input_dict, variables_holder, variables_dct, ConstVariables)
+    output_dict = autofill(input_dict, variables_dct, DynamicVariables(), ConstVariables, content='morning')
+    """
+    {'whoami': 'Clock',
+     'username': 'Alert Lee',
+     'greetings': "Clock: Hello Alert Lee, it's 11:07:16 now, morning!",
+     'greeting_content': 'morning'}
+    """
     print(output_dict)
