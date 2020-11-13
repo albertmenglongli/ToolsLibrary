@@ -1,0 +1,1 @@
+python-gitlab==2.5.0
