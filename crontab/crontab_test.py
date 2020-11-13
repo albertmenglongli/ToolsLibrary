@@ -1,4 +1,4 @@
-from crontab import *
+from . crontab import *
 
 
 def test():
