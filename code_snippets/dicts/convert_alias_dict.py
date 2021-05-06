@@ -35,13 +35,13 @@ def convert_alias_dict_to_lookup_map(alias_dict):
 if __name__ == '__main__':
     # basic usage
 
-    device_types = {
+    device_types_alias = {
         'computer': ['mac', 'laptop', 'workstation', 'pc', 'server'],
         'phone': ['cellphone', 'telephone', 'iphone', 'mobile'],
     }
-    lookup_map = convert_alias_dict_to_lookup_map(device_types)
+    device_lookup_map = convert_alias_dict_to_lookup_map(device_types_alias)
 
-    assert lookup_map == {
+    assert device_lookup_map == {
         'mac': 'computer',
         'laptop': 'computer',
         'workstation': 'computer',
@@ -52,8 +52,8 @@ if __name__ == '__main__':
         'iphone': 'phone',
         'mobile': 'phone',
     }
-    assert lookup_map['mac'] == 'computer'
-    assert lookup_map['workstation'] == 'computer'
+    assert device_lookup_map['mac'] == 'computer'
+    assert device_lookup_map['workstation'] == 'computer'
 
 
     # support other data types like generator, set, tuple or raw string
@@ -63,13 +63,13 @@ if __name__ == '__main__':
             yield alias
 
 
-    device_types = {
+    device_types_alias = {
         'phone': phone_alias_generator(),  # generator
         'ipad': 'ipad pro',  # raw string
     }
 
-    lookup_map = convert_alias_dict_to_lookup_map(device_types)
-    assert lookup_map == {
+    device_lookup_map = convert_alias_dict_to_lookup_map(device_types_alias)
+    assert device_lookup_map == {
         'cellphone': 'phone',
         'telephone': 'phone',
         'iphone': 'phone',
@@ -78,6 +78,6 @@ if __name__ == '__main__':
     }
 
     # the original generator is untouched
-    assert list(device_types['phone']) == ['cellphone', 'telephone', 'iphone', 'mobile']
+    assert list(device_types_alias['phone']) == ['cellphone', 'telephone', 'iphone', 'mobile']
     # the original generator is consumed
-    assert list(device_types['phone']) == []
+    assert list(device_types_alias['phone']) == []
