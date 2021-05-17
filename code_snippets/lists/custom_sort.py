@@ -28,7 +28,7 @@ def sort_with_custom_orders(values, key=lambda x: x, prefix_orders=None, suffix_
     for idx, item in enumerate(suffix_orders, start=2):
         order_map[item] = idx
 
-    sorted_values = sorted(values, key=lambda x: (x not in prefix_orders_set, order_map[x], key(x)))
+    sorted_values = sorted(values, key=lambda x: (order_map[x], key(x)))
 
     return sorted_values
 
