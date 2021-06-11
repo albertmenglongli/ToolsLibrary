@@ -1,11 +1,3 @@
-
-
-code_name_mapping = {
-    '005918': "天弘沪深300ETF联接C",
-    '002207': "前海开源金银珠宝混合C",
-}
-
-
 import asyncio
 import json
 import re
