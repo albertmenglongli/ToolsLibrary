@@ -1,12 +1,19 @@
+
+
+code_name_mapping = {
+    '005918': "天弘沪深300ETF联接C",
+    '002207': "前海开源金银珠宝混合C",
+}
+
+
 import asyncio
 import json
-import pprint
 import re
 from functools import cmp_to_key
 
 import aiohttp
 import requests
-from funcy import first, keep, lmap
+from funcy import first, keep, lmap, identity
 
 code_name_mapping = {
     '005918': "天弘沪深300ETF联接C",
@@ -31,15 +38,16 @@ def get_code_by_name(search):
 
 def cmp_by_gszzl(a: dict, b: dict):
     try:
-        a_gszzl = float(a.get('gszzl', '0'))
-        b_gszzl = float(b.get('gszzl', '0'))
+        a_gszzl = float(a.get('gszzl', '0')) or '0'
+        b_gszzl = float(b.get('gszzl', '0')) or '0'
         if a_gszzl < b_gszzl:
             return -1
         if a_gszzl > b_gszzl:
             return 1
-    except Exception:
+    except (TypeError, Exception) as e:
         # unable to compare
         pass
+    return 0
 
 
 def parse_to_chinese_readable(data):
@@ -61,6 +69,7 @@ async def get_data(code, future):
     """
     url = 'http://fundgz.1234567.com.cn/js/%s.js' % code
     res = {}
+    status = False
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
         async with session.get(url, ssl=False) as resp:
             try:
@@ -68,6 +77,7 @@ async def get_data(code, future):
                     text = await resp.text()
                     data = json.loads(re.match(".*?({.*}).*", text, re.S).group(1))
                     res = data
+                    status = True
                 elif resp.status == 404:
                     pass
                 else:
@@ -76,6 +86,7 @@ async def get_data(code, future):
                 print(f'failed get estimation for code {code}, {e}')
 
             future.set_result(res)
+    return code, status
 
 
 async def main():
@@ -84,21 +95,31 @@ async def main():
 
     tasks = []
     codes = code_name_mapping.keys()
+    completed_codes = []
     for _code in codes:
         _future = asyncio.Future()
         _future.add_done_callback(lambda f: fund_data.append(f.result()))
         _task = asyncio.ensure_future(get_data(_code, _future))
         tasks.append(_task)
 
-    for t in asyncio.as_completed(tasks):
-        await t
+    try:
+        for t in asyncio.as_completed(tasks, timeout=3):
+            _code, _status = await t
+            if _status:
+                completed_codes.append(_code)
+    except asyncio.TimeoutError as timeout_err:
+        print(timeout_err)
 
+    fund_data = list(keep(identity, fund_data))  # remove falsy values
     fund_data = lmap(parse_to_chinese_readable,  # parse to more readable
-                     sorted(keep(fund_data),  # remove falsy values, sort by gszzl asc
-                            key=cmp_to_key(cmp_by_gszzl)))
+                     sorted(fund_data, key=cmp_to_key(cmp_by_gszzl)))  # sort by gszzl asc
 
+    failed_codes = set(codes) - set(completed_codes)
+    if failed_codes:
+        print('Failed to get data for ', failed_codes)
+    print('Data:')
     for d in fund_data:
-        pprint.pprint(d)
+        print(d)
 
 
 # {'估值时间': '2021-06-04 13:06',
@@ -128,3 +149,4 @@ if __name__ == '__main__':
             loop.run_until_complete(loop.shutdown_asyncgens())
         finally:
             loop.close()
+
