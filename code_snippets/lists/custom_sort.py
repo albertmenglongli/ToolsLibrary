@@ -60,7 +60,7 @@ if __name__ == '__main__':
             return hash(self.name)
 
 
-    res = sort_with_custom_orders([Person('lml'), Person('xc')], key=lambda p: p.name, prefix_orders=['xc', 'lml'])
-    assert res == [Person('xc'), Person('lml')]
+    res = sort_with_custom_orders([Person('lml'), Person('xc'), Person('wyw')], key=lambda p: p.name, prefix_orders=['xc', 'lml'])
+    assert res == [Person('xc'), Person('lml'), Person('wyw')]
 
         
