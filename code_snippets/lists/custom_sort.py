@@ -28,7 +28,7 @@ def sort_with_custom_orders(values, key=lambda x: x, prefix_orders=None, suffix_
     for idx, item in enumerate(suffix_orders, start=2):
         order_map[item] = idx
 
-    sorted_values = sorted(values, key=lambda x: (order_map[x], key(x)))
+    sorted_values = sorted(values, key=lambda x: (order_map[key(x)], key(x)))
 
     return sorted_values
 
@@ -45,3 +45,22 @@ if __name__ == '__main__':
                                             suffix_orders=['t1', 't2', 't3'])
 
     assert sorted_values == ['h1', 'h2', 'a', 'B', 'x', 'Y', 't1', 't2']
+    
+    class Person:
+        def __init__(self, name):
+            self.name = name
+
+
+        def __eq__(self, other):
+            if not isinstance(other, Person):
+                return False
+            return self.name == other.name
+        
+        def __hash__(self):
+            return hash(self.name)
+
+
+    res = sort_with_custom_orders([Person('lml'), Person('xc')], key=lambda p: p.name, prefix_orders=['xc', 'lml'])
+    assert res == [Person('xc'), Person('lml')]
+
+        
