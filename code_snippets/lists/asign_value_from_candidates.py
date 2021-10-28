@@ -12,6 +12,8 @@ id = next((item for item in [data_dict.get('userid', None),
 # Notice that this has Python recursive limitation
 
 def until(terminate, iterator, default):
+    if isinstance(iterator, list):
+        iterator = iter(iterator)
     try:
         i = next(iterator)
         if terminate(i):
