@@ -2,36 +2,18 @@ import asyncio
 import json
 import re
 from functools import cmp_to_key
+from typing import List
 
 import aiohttp
-import requests
-from funcy import first, keep, lmap, identity
-
-code_name_mapping = {
-    '005918': "天弘沪深300ETF联接C",
-    '002207': "前海开源金银珠宝混合C",
-}
-
-
-def get_code_by_name(search):
-    global url, response, data, code
-    url = 'http://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key=' + search  #
-    response = requests.post(url)
-    data = response.json()
-    if data['ErrCode'] != 0:
-        raise Exception('Bad request')
-    datas = data.get('Datas', [])
-    item = first(datas)
-    if item is None:
-        raise Exception(f'Not found for {search}')
-    code = item['CODE']
-    return code
+import uvloop
+from funcy import lmap, lsplit
+from prettytable import PrettyTable
 
 
 def cmp_by_gszzl(a: dict, b: dict):
     try:
-        a_gszzl = float(a.get('gszzl', '0')) or '0'
-        b_gszzl = float(b.get('gszzl', '0')) or '0'
+        a_gszzl = float(a.get('gszzl', '0')) or 0
+        b_gszzl = float(b.get('gszzl', '0')) or 0
         if a_gszzl < b_gszzl:
             return -1
         if a_gszzl > b_gszzl:
@@ -42,103 +24,78 @@ def cmp_by_gszzl(a: dict, b: dict):
     return 0
 
 
-def parse_to_chinese_readable(data):
-    res = {
-        '估算增量': "%s%%" % format(data['gszzl']),
-        '基金编码': data['fundcode'],
-        '基金名称': data['name'],
-        '单位净值': data['dwjz'],
-        '净值日期': data['jzrq'],
-        '估算值': data['gsz'],
-        '估值时间': data['gztime'],
-    }
+def pretty_print_fund_data(fund_data: List[dict]):
+    def parse_to_chinese_readable(_data):
+        res: dict = {
+            '估算增量': _data['gszzl'],
+            '基金编码': _data['fundcode'],
+            '基金名称': _data['name'],
+            '单位净值': _data['dwjz'],
+            '净值日期': _data['jzrq'],
+            '估算值': _data['gsz'],
+            '估值时间': _data['gztime'],
+        }
+        return res
+
+    fund_data = lmap(parse_to_chinese_readable, fund_data)
+
+    table_decrease = PrettyTable()
+    table_increase = PrettyTable()
+    if fund_data:
+        for _data in fund_data:
+            if _data['估算增量'].startswith('-'):
+                if not table_decrease.field_names:
+                    table_decrease.field_names = list(_data.keys())
+                table_decrease.add_row(_data.values())
+            else:
+                if not table_increase.field_names:
+                    table_increase.field_names = list(_data.keys())
+                table_increase.add_row(_data.values())
+    table_decrease.align = table_increase.align = 'l'
+    if table_decrease.rowcount > 0:
+        print(table_decrease)
+    if table_decrease.rowcount > 0 and table_increase.rowcount > 0:
+        print()  # print a blank line as separator
+    if table_increase.rowcount > 0:
+        print(table_increase)
+
+
+async def fetch_data(session, code):
+    url = 'http://fundgz.1234567.com.cn/js/%s.js' % code
+    res = {}
+
+    timeout = aiohttp.ClientTimeout(total=2)
+    try:
+        async with session.get(url, ssl=False, timeout=timeout) as resp:
+            if resp.status == 200:
+                text = await resp.text()
+                data = json.loads(re.match(".*?({.*}).*", text, re.S).group(1))
+                res = data
+    except TimeoutError:
+        raise TimeoutError(f'{code}(Timeout)')
+    except Exception:
+        raise Exception(code)
+    if not res:
+        raise Exception(code)
     return res
 
 
-async def get_data(code, future):
-    """
-    通过基金编码获取估值
-    """
-    url = 'http://fundgz.1234567.com.cn/js/%s.js' % code
-    res = {}
-    status = False
+async def main(codes: List[str]):
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
-        async with session.get(url, ssl=False) as resp:
-            try:
-                if resp.status == 200:
-                    text = await resp.text()
-                    data = json.loads(re.match(".*?({.*}).*", text, re.S).group(1))
-                    res = data
-                    status = True
-                elif resp.status == 404:
-                    pass
-                else:
-                    pass
-            except Exception as e:
-                print(f'failed get estimation for code {code}, {e}')
+        fetch_datas = [fetch_data(session, _code) for _code in codes]
+        results = await asyncio.gather(*fetch_datas, return_exceptions=True)
 
-            future.set_result(res)
-    return code, status
+    fund_data, exceptions = lsplit(lambda x: not isinstance(x, Exception), results)
+    if exceptions:
+        print('Failed to get data for', ','.join(map(str, exceptions)))
 
+    pretty_print_fund_data(fund_data=sorted(fund_data, key=cmp_to_key(cmp_by_gszzl)))
 
-async def main():
-    # collect all 基金估算数据
-    fund_data = []
-
-    tasks = []
-    codes = code_name_mapping.keys()
-    completed_codes = []
-    for _code in codes:
-        _future = asyncio.Future()
-        _future.add_done_callback(lambda f: fund_data.append(f.result()))
-        _task = asyncio.ensure_future(get_data(_code, _future))
-        tasks.append(_task)
-
-    try:
-        for t in asyncio.as_completed(tasks, timeout=3):
-            _code, _status = await t
-            if _status:
-                completed_codes.append(_code)
-    except asyncio.TimeoutError as timeout_err:
-        print(timeout_err)
-
-    fund_data = list(keep(identity, fund_data))  # remove falsy values
-    fund_data = lmap(parse_to_chinese_readable,  # parse to more readable
-                     sorted(fund_data, key=cmp_to_key(cmp_by_gszzl)))  # sort by gszzl asc
-
-    failed_codes = set(codes) - set(completed_codes)
-    if failed_codes:
-        print('Failed to get data for ', failed_codes)
-    print('Data:')
-    for d in fund_data:
-        print(d)
-
-
-# {'估值时间': '2021-06-04 13:06',
-#  '估算值': '1.2319',
-#  '估算增量': '-0.82%',
-#  '净值日期': '2021-06-03',
-#  '单位净值': '1.2420',
-#  '基金名称': '前海开源金银珠宝混合C',
-#  '基金编码': '002207'}
-# {'估值时间': '2021-06-04 13:04',
-#  '估算值': '1.4678',
-#  '估算增量': '0.48%',
-#  '净值日期': '2021-06-03',
-#  '单位净值': '1.4607',
-#  '基金名称': '天弘沪深300ETF联接C',
-#  '基金编码': '005918'}
 
 if __name__ == '__main__':
-    asyncio.set_event_loop(None)
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    future = loop.create_future()
-    try:
-        loop.run_until_complete(main())
-    finally:
-        try:
-            loop.run_until_complete(loop.shutdown_asyncgens())
-        finally:
-            loop.close()
+    codes = ['002207', '003834', '004241', '005918', '006128',
+             '009026', '010685', '161005', '161721', '161724',
+             '161725', '163402', '165520', '180012', '400015']
 
+    uvloop.install()
+    asyncio.run(main(codes=codes), debug=True)
